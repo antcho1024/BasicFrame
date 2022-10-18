@@ -1,12 +1,13 @@
 package com.example.intermediate.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +33,10 @@ public class Member extends Timestamped {
   @JsonIgnore
   private String password;
 
+  @JsonManagedReference
+  @OneToMany(fetch = FetchType.EAGER,mappedBy = "member")
+  private List<LikePost> likePosts = new ArrayList<>();
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -52,4 +57,5 @@ public class Member extends Timestamped {
   public boolean validatePassword(PasswordEncoder passwordEncoder, String password) {
     return passwordEncoder.matches(password, this.password);
   }
+
 }

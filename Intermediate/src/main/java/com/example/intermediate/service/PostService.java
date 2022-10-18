@@ -1,14 +1,17 @@
 package com.example.intermediate.service;
 
 import com.example.intermediate.controller.response.CommentResponseDto;
+import com.example.intermediate.controller.response.LikePostResponseDto;
 import com.example.intermediate.controller.response.PostResponseDto;
 import com.example.intermediate.domain.Comment;
+import com.example.intermediate.domain.LikePost;
 import com.example.intermediate.domain.Member;
 import com.example.intermediate.domain.Post;
 import com.example.intermediate.controller.request.PostRequestDto;
 import com.example.intermediate.controller.response.ResponseDto;
 import com.example.intermediate.jwt.TokenProvider;
 import com.example.intermediate.repository.CommentRepository;
+import com.example.intermediate.repository.LikePostRepository;
 import com.example.intermediate.repository.PostRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +27,7 @@ public class PostService {
 
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
+  private final LikePostRepository likePostRepository;
 
   private final TokenProvider tokenProvider;
 
@@ -84,12 +88,27 @@ public class PostService {
       );
     }
 
+    List<LikePost> likePostList = likePostRepository.findAllByPost(post);
+    List<LikePostResponseDto> likePostResponseDtoList = new ArrayList<>();
+
+    for (LikePost likePost : likePostList) {
+      likePostResponseDtoList.add(
+              LikePostResponseDto.builder()
+                      .id(likePost.getId())
+                      .likeOwner(likePost.getMember().getNickname())
+                      .createdAt(likePost.getCreatedAt())
+                      .modifiedAt(likePost.getModifiedAt())
+                      .build()
+      );
+    }
     return ResponseDto.success(
         PostResponseDto.builder()
             .id(post.getId())
             .title(post.getTitle())
             .content(post.getContent())
             .commentResponseDtoList(commentResponseDtoList)
+            .likePostResponseDtoList(likePostResponseDtoList)
+            .likeCount(post.countLike())
             .author(post.getMember().getNickname())
             .createdAt(post.getCreatedAt())
             .modifiedAt(post.getModifiedAt())

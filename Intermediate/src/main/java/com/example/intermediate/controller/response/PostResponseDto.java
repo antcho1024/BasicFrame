@@ -17,6 +17,8 @@ public class PostResponseDto {
   private String content;
   private String author;
   private List<CommentResponseDto> commentResponseDtoList;
+  private List<LikePostResponseDto> likePostResponseDtoList;
+  private int likeCount =0;
   private LocalDateTime createdAt;
   private LocalDateTime modifiedAt;
 }
