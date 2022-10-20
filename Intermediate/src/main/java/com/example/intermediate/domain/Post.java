@@ -47,7 +47,7 @@ public class Post extends Timestamped {
 
   //mappedBy = "post", // 반대쪽 변수명이랑 맞추기
   @JsonManagedReference
-  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "post",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   private List<LikePost> likePosts = new ArrayList<>();
 
   public void update(PostRequestDto postRequestDto) {

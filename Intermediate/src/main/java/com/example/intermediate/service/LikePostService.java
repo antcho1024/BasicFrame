@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class LikePostService {
     private final LikePostRepository likePostRepository;
 
     private final TokenProvider tokenProvider;
-    @Transactional
+//    @Transactional
     public ResponseDto<?> likePost(Long post_id, HttpServletRequest request){
         if (null == request.getHeader("Refresh-Token")) {
             return ResponseDto.fail("MEMBER_NOT_FOUND",
@@ -42,26 +43,20 @@ public class LikePostService {
         Post post = postRepository.findById(post_id).orElse(null);
         if(post == null) return ResponseDto.fail("NOT_FOUND","게시글을 찾을 수 없습니다.");
 
-        LikePost like = null;
-        for(LikePost likeCheck : post.getLikePosts()){
-            if(likeCheck.getMember().getId()==member.getId()) {
-                like=likeCheck;
-                break;
-            }
-        }
-        if(like==null){
+        Optional<LikePost> like = likePostRepository.findByMemberAndPost(member, post);
+
+        if(!like.isPresent()){
             // 좋아요
-            like = new LikePost();
-            like.setMember(member);
-            like.setPost(post);
-            post.getLikePosts().add(like);
-            likePostRepository.save(like);
+            LikePost newLike = new LikePost();
+            newLike.setMember(member);
+            newLike.setPost(post);
+            post.getLikePosts().add(newLike);
+            member.getLikePosts().add(newLike);
+            likePostRepository.save(newLike);
         }
         else {
             // 좋아요 취소
-            post.getLikePosts().remove(like);
-            member.getLikePosts().remove(like);
-            likePostRepository.delete(like);
+            likePostRepository.delete(like.get());
         }
 
 
